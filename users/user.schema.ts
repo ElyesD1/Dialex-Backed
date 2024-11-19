@@ -34,13 +34,26 @@ export class User {
   points: number;
 
   // Properties for tracking streaks
-  @Prop({ default: 0 })
+  @Prop({ default: 1 })
   streakDays: number;
 
   @Prop({ default: new Date() })
   lastLoginDate: Date;
+
   @Prop()
-  lastClaimDate?: Date; 
+  lastClaimDate?: Date;
+
+  // New property for storing user-selected languages
+  @Prop({
+    type: [
+      {
+        name: { type: String, required: true },
+        key: { type: String, required: true },
+      },
+    ],
+    default: [],
+  })
+  languages: { name: string; key: string }[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

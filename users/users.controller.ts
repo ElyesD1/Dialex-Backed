@@ -16,7 +16,13 @@ class SignupDto {
   @MinLength(8)
   password: string;
 }
+class UpdatePointsDto {
+  @IsEmail()
+  email: string;
 
+  
+  points: number;
+}
 // DTO for Login
 class LoginDto {
   @IsEmail()
@@ -43,7 +49,19 @@ class UpdateProfileDto {
   @IsString()
   newPassword?: string;
 }
+class AddLanguageDto {
+  
+  @IsString()
+  email: string;
 
+  
+  @IsString()
+  languageName: string;
+
+  
+  @IsString()
+  languageKey: string;
+}
 // DTO for Forgot Password
 class ForgotPasswordDto {
   @IsEmail()
@@ -73,7 +91,30 @@ export class UsersController {
       throw new BadRequestException('Signup failed: ' + error.message);
     }
   }
+  @Post('add-language')
+  async addLanguage(@Body() addLanguageDto: AddLanguageDto): Promise<{ message: string }> {
+    const { email, languageName, languageKey } = addLanguageDto;
+  
+    if (!email || !languageName || !languageKey) {
+      throw new BadRequestException('Email, languageName, and languageKey are required.');
+    }
+  
+    try {
+      // Call the service to add the language
+      await this.usersService.addLanguage(email, { name: languageName, key: languageKey });
+      return { message: 'Language added successfully' };
+    } catch (error) {
+      throw new BadRequestException('Failed to add language: ' + error.message);
+    }
+  }
+  @Get('languages')
+  async getLanguages(@Query('email') email: string): Promise<{ name: string; key: string }[]> {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
 
+    return this.usersService.getLanguagesByEmail(email);
+  }
   @Post('google-signin')
   async googleSignIn(@Body() body: { googleId: string; name: string; email: string }) {
     const { googleId, name, email } = body;

@@ -57,7 +57,39 @@ export class UsersService {
     return user;
   }
 
+  async addLanguage(email: string, language: { name: string; key: string }): Promise<void> {
+    // Find the user by email
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+  
+    // Avoid duplicate entries in languages array based on the key
+    if (user.languages.some(lang => lang.key === language.key)) {
+      throw new ConflictException('Language already exists');
+    }
+  
+    // Push the new language into the languages array
+    user.languages.push(language);
+  
+    try {
+      // Save the updated user document
+      await user.save();
+    } catch (error) {
+      throw new BadRequestException('Failed to add language: ' + error.message);
+    }
+  }
+  async getLanguagesByEmail(email: string): Promise<{ name: string; key: string }[]> {
+    // Find the user by email
+    const user = await this.userModel.findOne({ email }).select('languages');
+    
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
 
+    // Return the languages array (name and key)
+    return user.languages;
+  }
   // Send verification email with Brevo
   private async sendVerificationEmail(email: string, token: string) {
     const verificationUrl = `http://localhost:3000/users/verify-email?token=${token}`;
